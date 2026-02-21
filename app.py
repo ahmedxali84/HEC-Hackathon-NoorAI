@@ -2,12 +2,14 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 from pages import home, quran_reader, scholar_tafsir, hadith_specialist, how_to_use
+from datetime import datetime
+import calendar
 
 st.set_page_config(
     page_title="NoorAI - Islamic Guidance Platform",
     page_icon="🕌",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"
 )
 
 # ========== PROFESSIONAL DARK ISLAMIC THEME ==========
@@ -27,8 +29,13 @@ st.markdown("""
         background: linear-gradient(135deg, #0a0f1c 0%, #1a1f2f 100%);
     }
     
+    /* Smooth scrolling for the whole page */
+    html {
+        scroll-behavior: smooth;
+    }
+    
     /* Hide Streamlit Default Elements */
-    #MainMenu, header, footer, .stDeployButton, .stAppToolbar {
+    #MainMenu, footer, .stDeployButton, .stAppToolbar {
         display: none !important;
     }
     
@@ -36,173 +43,237 @@ st.markdown("""
         display: none !important;
     }
     
-    /* ===== SIDEBAR STYLING ===== */
-    section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0f1a2f 0%, #1a2a3f 100%) !important;
-        border-right: 2px solid #c4a962;
-        box-shadow: 5px 0 30px rgba(0,0,0,0.5);
-    }
-    
-    /* Sidebar Content Wrapper */
-    section[data-testid="stSidebar"] > div {
+    header[data-testid="stHeader"] {
         background: transparent !important;
+        border-bottom: none !important;
+        box-shadow: none !important;
+        height: 0 !important;
     }
     
-    /* Sidebar Header with Logo */
-    .sidebar-header {
-        background: linear-gradient(135deg, #1a2a3a, #0f1a2f);
-        padding: 2rem 1.5rem;
-        margin-bottom: 2rem;
-        border-bottom: 2px solid #c4a962;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-        border-radius: 0 0 20px 20px;
+    /* Completely hide sidebar */
+    section[data-testid="stSidebar"] {
+        display: none !important;
     }
     
-    .sidebar-header::before {
-        content: "﷽";
-        position: absolute;
-        top: -10px;
-        right: -10px;
-        font-size: 4rem;
-        font-family: 'Amiri', serif;
-        color: rgba(196, 169, 98, 0.1);
-        transform: rotate(15deg);
+    /* Main content - full width centered */
+    .main .block-container {
+        padding: 2rem !important;
+        max-width: 1200px !important;
+        margin: 0 auto !important;
+        width: 100% !important;
+        scroll-margin-top: 100px;
     }
     
-    .sidebar-logo {
-        font-size: 3rem;
-        margin-bottom: 0.5rem;
+    /* Page sections with scroll targets */
+    .page-section {
+        scroll-margin-top: 100px;
+        transition: opacity 0.3s ease;
     }
     
-    .sidebar-title {
-        color: #d4af37;
-        font-size: 2rem;
-        font-family: 'Amiri', serif;
-        font-weight: 700;
-        margin-bottom: 0.25rem;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    }
-    
-    .sidebar-subtitle {
-        color: #c4a962;
-        font-size: 0.85rem;
-        letter-spacing: 1px;
-        opacity: 0.9;
-    }
-    
-    /* ===== NAVIGATION OPTIONS - LIKE PRAYER TIMES ===== */
-    /* Container for all options */
-    .nav-options-container {
-        background: transparent;
-        padding: 0.5rem;
-    }
-    
-    /* Individual option box - EXACTLY LIKE PRAYER TIMES */
-    .nav-option-box {
+    /* ===== TOP NAVIGATION BAR ===== */
+    .top-navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
         background: linear-gradient(135deg, #1a2a3a, #152238);
         border: 1px solid #c4a962;
-        border-radius: 12px;
-        padding: 1rem 1.2rem;
-        margin: 0.5rem 0;
-        transition: all 0.3s ease;
+        border-radius: 50px;
+        padding: 0.5rem 1rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        flex-wrap: wrap;
+        position: sticky;
+        top: 10px;
+        z-index: 1000;
+        backdrop-filter: blur(10px);
+    }
+    
+    .nav-links {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .nav-link {
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 30px;
+        padding: 0.6rem 1.2rem;
+        color: #e8e8e8;
+        font-size: 0.95rem;
+        font-weight: 500;
         cursor: pointer;
+        transition: all 0.3s ease;
         display: flex;
         align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+    }
+    
+    .nav-link:hover {
+        border-color: #c4a962;
+        background: rgba(196, 169, 98, 0.1);
+        transform: translateY(-2px);
+    }
+    
+    .nav-link.active {
+        background: linear-gradient(135deg, #c4a962, #d4af37);
+        color: #0a0f1c;
+        font-weight: 600;
+    }
+    
+    .logo-small {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.3rem 1rem;
+        background: rgba(196, 169, 98, 0.1);
+        border-radius: 30px;
+        border: 1px solid #c4a962;
+        cursor: pointer;
+    }
+    
+    .logo-small span {
+        font-size: 1.5rem;
+    }
+    
+    .logo-small p {
+        color: #d4af37;
+        font-family: 'Amiri', serif;
+        font-size: 1.2rem;
+        font-weight: 700;
+    }
+    
+    /* ===== PRAYER & DATE BAR ===== */
+    .info-bar {
+        background: linear-gradient(135deg, #1a2a3a, #152238);
+        border: 1px solid #c4a962;
+        border-radius: 20px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
         gap: 1rem;
     }
     
-    .nav-option-box:hover {
-        background: linear-gradient(135deg, #2a3a4a, #1e2a3a);
-        border: 1px solid #d4af37;
-        transform: translateX(5px);
-        box-shadow: 0 4px 12px rgba(196, 169, 98, 0.2);
+    .prayer-times {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
     }
     
-    .nav-option-box.active {
-        background: linear-gradient(135deg, #c4a962, #d4af37);
-        border: 1px solid #d4af37;
-        box-shadow: 0 4px 15px rgba(196, 169, 98, 0.3);
+    .prayer-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
     
-    .nav-option-box.active .nav-option-text {
-        color: #0a0f1c;
-        font-weight: 600;
-    }
-    
-    .nav-option-box.active .nav-option-icon {
-        color: #0a0f1c;
-    }
-    
-    .nav-option-icon {
-        font-size: 1.3rem;
+    .prayer-item .name {
         color: #c4a962;
-        width: 28px;
-        text-align: center;
-    }
-    
-    .nav-option-text {
-        font-size: 1rem;
-        color: #e8e8e8;
+        font-size: 0.9rem;
         font-weight: 500;
     }
     
-    /* ===== PRAYER WIDGET - EXISTING STYLE ===== */
-    .prayer-widget {
+    .prayer-item .time {
+        color: #e8e8e8;
+        font-weight: 600;
+        font-size: 0.95rem;
+        background: rgba(196, 169, 98, 0.1);
+        padding: 0.2rem 0.5rem;
+        border-radius: 20px;
+    }
+    
+    .date-section {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .date-box {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(196, 169, 98, 0.1);
+        padding: 0.4rem 1rem;
+        border-radius: 30px;
+        border: 1px solid rgba(196, 169, 98, 0.3);
+    }
+    
+    .date-box .label {
+        color: #c4a962;
+        font-size: 0.85rem;
+    }
+    
+    .date-box .value {
+        color: #e8e8e8;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+    
+    .hijri-date {
+        font-family: 'Amiri', serif;
+        font-size: 1.1rem;
+    }
+    
+    /* ===== ISLAMIC EVENTS SECTION ===== */
+    .events-section {
         background: linear-gradient(135deg, #1a2a3a, #152238);
         border: 1px solid #c4a962;
-        border-radius: 15px;
-        padding: 1.5rem;
-        margin: 1rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        border-radius: 20px;
+        padding: 1.2rem 1.5rem;
+        margin-bottom: 2rem;
     }
     
-    .prayer-title {
+    .events-title {
         color: #d4af37;
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         font-weight: 600;
-        margin-bottom: 1.2rem;
-        text-align: center;
+        margin-bottom: 1rem;
         font-family: 'Amiri', serif;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
     
-    .prayer-row {
+    .events-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .event-card {
+        background: rgba(196, 169, 98, 0.05);
+        border: 1px solid rgba(196, 169, 98, 0.2);
+        border-radius: 15px;
+        padding: 0.8rem 1.2rem;
+        flex: 1 1 200px;
+        transition: all 0.3s ease;
+    }
+    
+    .event-card:hover {
+        background: rgba(196, 169, 98, 0.1);
+        border-color: #c4a962;
+        transform: translateY(-2px);
+    }
+    
+    .event-name {
+        color: #d4af37;
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 0.3rem;
+    }
+    
+    .event-date {
+        color: #e8e8e8;
+        font-size: 0.85rem;
         display: flex;
         justify-content: space-between;
-        padding: 0.6rem 0;
-        border-bottom: 1px solid rgba(196, 169, 98, 0.2);
-        color: #e8e8e8;
     }
     
-    .prayer-row:last-child {
-        border-bottom: none;
-    }
-    
-    .prayer-name {
-        color: #c4a962;
-        font-weight: 500;
-    }
-    
-    .prayer-time {
-        color: #e8e8e8;
-    }
-    
-    /* ===== DIVIDER ===== */
-    .nav-divider {
-        height: 1px;
-        background: linear-gradient(90deg, transparent, #c4a962, transparent);
-        margin: 2rem 1rem;
-    }
-    
-    /* ===== ISLAMIC DATE ===== */
-    .islamic-date {
-        background: linear-gradient(135deg, #1a2a3a, #152238);
-        padding: 1rem;
-        border-radius: 12px;
-        margin: 1rem;
-        text-align: center;
-        border: 1px solid #c4a962;
+    .event-date .gregorian {
+        color: #9ca3af;
     }
     
     /* ===== MAIN HEADER ===== */
@@ -211,7 +282,7 @@ st.markdown("""
         padding: 2.5rem;
         border-radius: 20px;
         border: 2px solid #c4a962;
-        margin: 1rem 1rem 2rem 1rem;
+        margin-bottom: 2rem;
         box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         position: relative;
         overflow: hidden;
@@ -238,6 +309,12 @@ st.markdown("""
         margin-bottom: 0.5rem;
     }
     
+    @media (max-width: 768px) {
+        .main-title {
+            font-size: 2.2rem;
+        }
+    }
+    
     .main-subtitle {
         color: #e8e8e8;
         text-align: center;
@@ -245,39 +322,14 @@ st.markdown("""
         letter-spacing: 1px;
     }
     
-    /* ===== CARDS ===== */
-    .card {
-        background: linear-gradient(135deg, #1a2a3a, #0f1a2f);
-        border: 1px solid #c4a962;
-        border-radius: 15px;
-        padding: 1.5rem;
-        margin: 1rem 0;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    /* ===== PAGE CONTAINERS ===== */
+    .page-container {
+        animation: fadeIn 0.5s ease;
     }
     
-    .card-title {
-        color: #d4af37;
-        font-size: 1.3rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        font-family: 'Amiri', serif;
-        border-bottom: 2px solid #c4a962;
-        padding-bottom: 0.5rem;
-    }
-    
-    /* ===== ARABIC TEXT ===== */
-    .arabic-text {
-        font-family: 'Amiri', serif;
-        font-size: 2rem;
-        color: #d4af37;
-        text-align: right;
-        line-height: 1.8;
-        padding: 1.5rem;
-        background: rgba(0,0,0,0.3);
-        border-radius: 15px;
-        border: 1px solid #c4a962;
-        margin: 1rem 0;
-        direction: rtl;
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
     
     /* ===== FOOTER ===== */
@@ -288,6 +340,32 @@ st.markdown("""
         background: linear-gradient(135deg, #1a2a3a, #0f1a2f);
         border-top: 2px solid #c4a962;
         color: #e8e8e8;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .top-navbar {
+            flex-direction: column;
+            gap: 1rem;
+            border-radius: 20px;
+        }
+        
+        .nav-links {
+            justify-content: center;
+        }
+        
+        .info-bar {
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .prayer-times {
+            justify-content: center;
+        }
+        
+        .date-section {
+            justify-content: center;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -308,85 +386,180 @@ def init_session_states():
 
 init_session_states()
 
-# ===== SIDEBAR =====
-with st.sidebar:
-    # Header with Logo
+# Current date
+today = datetime.now()
+current_year = today.year
+current_month = today.month
+current_day = today.day
+
+# ===== ISLAMIC CALENDAR 2026 DATA =====
+islamic_events_2026 = [
+    {"event": "Al Isra' wal Mi'raj", "hijri": "27 Rajab 1447", "gregorian": "16 Jan 2026", "description": "Night Journey and Ascension"},
+    {"event": "Shab-e-Barat", "hijri": "15 Shaban 1447", "gregorian": "3 Feb 2026", "description": "Night of Forgiveness"},
+    {"event": "Ramadan Begins", "hijri": "1 Ramadan 1447", "gregorian": "18 Feb 2026", "description": "First day of fasting"},
+    {"event": "Laylatul Qadr", "hijri": "27 Ramadan 1447", "gregorian": "17 Mar 2026", "description": "Night of Power"},
+    {"event": "Eid al-Fitr", "hijri": "1 Shawwal 1447", "gregorian": "20 Mar 2026", "description": "Festival of Breaking Fast"},
+    {"event": "Hajj Begins", "hijri": "8 Dhul Hijjah 1447", "gregorian": "25 May 2026", "description": "Day of Tarwiyah"},
+    {"event": "Day of Arafah", "hijri": "9 Dhul Hijjah 1447", "gregorian": "26 May 2026", "description": "Standing at Arafat"},
+    {"event": "Eid al-Adha", "hijri": "10 Dhul Hijjah 1447", "gregorian": "27 May 2026", "description": "Festival of Sacrifice"},
+    {"event": "Islamic New Year", "hijri": "1 Muharram 1448", "gregorian": "16 Jun 2026", "description": "Hijri New Year"},
+    {"event": "Day of Ashura", "hijri": "10 Muharram 1448", "gregorian": "25 Jun 2026", "description": "Day of Remembrance"},
+    {"event": "Mawlid al-Nabi", "hijri": "12 Rabi' al-Awwal 1448", "gregorian": "25 Aug 2026", "description": "Birth of Prophet Muhammad (PBUH)"}
+]
+
+# Current Hijri date
+current_hijri_month = "Ramadan"
+current_hijri_day = 3
+current_hijri_year = 1447
+
+# JavaScript for smooth scrolling
+st.markdown("""
+<script>
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+// Function to handle page navigation with scroll
+function navigateToPage(pageName) {
+    // Scroll to top smoothly
+    scrollToTop();
+    
+    // Small delay to let scroll complete before page change
+    setTimeout(function() {
+        // Trigger Streamlit page change
+        window.parent.postMessage({
+            type: 'streamlit:setComponentValue',
+            value: pageName
+        }, '*');
+    }, 300);
+}
+
+// Highlight active nav button based on current page
+function setActiveNavButton() {
+    const currentPage = "Home"; // This will be updated by Streamlit
+    const navButtons = document.querySelectorAll('.nav-link');
+    
+    navButtons.forEach(btn => {
+        if (btn.textContent.includes(currentPage)) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+// Smooth scroll to any element
+function smoothScrollToElement(elementId) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
+}
+
+// Run on load
+window.addEventListener('load', function() {
+    setActiveNavButton();
+});
+</script>
+""", unsafe_allow_html=True)
+
+# ===== TOP NAVIGATION BAR =====
+col1, col2 = st.columns([1, 4])
+
+with col1:
     st.markdown("""
-    <div class='sidebar-header'>
-        <div class='sidebar-logo'>🕌</div>
-        <div class='sidebar-title'>NoorAI</div>
-        <div class='sidebar-subtitle'>نور الذكاء الاصطناعي</div>
+    <div class='logo-small' onclick='scrollToTop()'>
+        <span>🕌</span>
+        <p>NoorAI</p>
     </div>
     """, unsafe_allow_html=True)
+
+with col2:
+    # Navigation links with custom HTML for better control
+    nav_cols = st.columns(5)
     
-    # Navigation Menu - Custom HTML/CSS instead of option_menu
-    st.markdown('<div class="nav-options-container">', unsafe_allow_html=True)
+    with nav_cols[0]:
+        if st.button("🏠 Home", key="nav_home", use_container_width=True):
+            st.session_state.page = "Home"
+            st.markdown("<script>scrollToTop();</script>", unsafe_allow_html=True)
+            st.rerun()
     
-    # Home Option
-    home_selected = "active" if st.session_state.get('page', 'Home') == 'Home' else ""
-    if st.button("🏠 Home", key="nav_home", use_container_width=True):
-        st.session_state.page = "Home"
-        st.rerun()
+    with nav_cols[1]:
+        if st.button("📖 Quran", key="nav_quran", use_container_width=True):
+            st.session_state.page = "Quran Reader"
+            st.markdown("<script>scrollToTop();</script>", unsafe_allow_html=True)
+            st.rerun()
     
-    # Quran Reader Option
-    if st.button("📖 Quran Reader", key="nav_quran", use_container_width=True):
-        st.session_state.page = "Quran Reader"
-        st.rerun()
+    with nav_cols[2]:
+        if st.button("👨‍🏫 Tafsir", key="nav_tafsir", use_container_width=True):
+            st.session_state.page = "Scholar Tafsir"
+            st.markdown("<script>scrollToTop();</script>", unsafe_allow_html=True)
+            st.rerun()
     
-    # Scholar Tafsir Option
-    if st.button("👨‍🏫 Scholar Tafsir", key="nav_scholar", use_container_width=True):
-        st.session_state.page = "Scholar Tafsir"
-        st.rerun()
+    with nav_cols[3]:
+        if st.button("📚 Hadith", key="nav_hadith", use_container_width=True):
+            st.session_state.page = "Hadith Specialist"
+            st.markdown("<script>scrollToTop();</script>", unsafe_allow_html=True)
+            st.rerun()
     
-    # Hadith Specialist Option
-    if st.button("📚 Hadith Specialist", key="nav_hadith", use_container_width=True):
-        st.session_state.page = "Hadith Specialist"
-        st.rerun()
-    
-    # How to Use Option
-    if st.button("ℹ️ How to Use", key="nav_howto", use_container_width=True):
-        st.session_state.page = "How to Use"
-        st.rerun()
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-    
-    # Decorative Divider
-    st.markdown("<div class='nav-divider'></div>", unsafe_allow_html=True)
-    
-    # Prayer Times Widget - EXACT STYLE
-    st.markdown("""
-    <div class='prayer-widget'>
-        <div class='prayer-title'>🕌 Prayer Times</div>
-        <div class='prayer-row'>
-            <span class='prayer-name'>Fajr</span>
-            <span class='prayer-time'>05:12 AM</span>
+    with nav_cols[4]:
+        if st.button("ℹ️ Guide", key="nav_guide", use_container_width=True):
+            st.session_state.page = "How to Use"
+            st.markdown("<script>scrollToTop();</script>", unsafe_allow_html=True)
+            st.rerun()
+
+# ===== PRAYER TIMES & ISLAMIC DATE BAR =====
+st.markdown(f"""
+<div class='info-bar'>
+    <div class='prayer-times'>
+        <div class='prayer-item'><span class='name'>Fajr</span><span class='time'>05:12</span></div>
+        <div class='prayer-item'><span class='name'>Dhuhr</span><span class='time'>12:30</span></div>
+        <div class='prayer-item'><span class='name'>Asr</span><span class='time'>15:45</span></div>
+        <div class='prayer-item'><span class='name'>Maghrib</span><span class='time'>18:15</span></div>
+        <div class='prayer-item'><span class='name'>Isha</span><span class='time'>19:45</span></div>
+    </div>
+    <div class='date-section'>
+        <div class='date-box'>
+            <span class='label'>Hijri:</span>
+            <span class='value hijri-date'>{current_hijri_day} {current_hijri_month} {current_hijri_year} AH</span>
         </div>
-        <div class='prayer-row'>
-            <span class='prayer-name'>Dhuhr</span>
-            <span class='prayer-time'>12:30 PM</span>
-        </div>
-        <div class='prayer-row'>
-            <span class='prayer-name'>Asr</span>
-            <span class='prayer-time'>03:45 PM</span>
-        </div>
-        <div class='prayer-row'>
-            <span class='prayer-name'>Maghrib</span>
-            <span class='prayer-time'>06:15 PM</span>
-        </div>
-        <div class='prayer-row'>
-            <span class='prayer-name'>Isha</span>
-            <span class='prayer-time'>07:45 PM</span>
+        <div class='date-box'>
+            <span class='label'>Gregorian:</span>
+            <span class='value'>{today.strftime("%d %b %Y")}</span>
         </div>
     </div>
-    """, unsafe_allow_html=True)
-    
-    # Islamic Date
-    st.markdown("""
-    <div class='islamic-date'>
-        <p style='color: #d4af37; font-size: 1.2rem; font-family: Amiri;'>15 Sha'aban 1445</p>
-        <p style='color: #e8e8e8; font-size: 0.9rem;'>March 21, 2025</p>
+</div>
+""", unsafe_allow_html=True)
+
+# ===== ISLAMIC EVENTS SECTION =====
+st.markdown("""
+<div class='events-section'>
+    <div class='events-title'>
+        <span>📅</span> Important Islamic Dates 2026 (1447-1448 AH)
     </div>
+    <div class='events-grid'>
+""", unsafe_allow_html=True)
+
+# Create event cards in a grid
+for event in islamic_events_2026:
+    st.markdown(f"""
+        <div class='event-card'>
+            <div class='event-name'>{event['event']}</div>
+            <div class='event-date'>
+                <span>{event['hijri']}</span>
+                <span class='gregorian'>{event['gregorian']}</span>
+            </div>
+            <div style='color: #9ca3af; font-size: 0.75rem; margin-top: 0.3rem;'>{event['description']}</div>
+        </div>
     """, unsafe_allow_html=True)
+
+st.markdown("</div></div>", unsafe_allow_html=True)
 
 # ===== MAIN HEADER =====
 st.markdown("""
@@ -396,9 +569,12 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ===== PAGE ROUTING =====
+# ===== PAGE ROUTING with auto-scroll =====
+st.markdown("<div class='page-container'>", unsafe_allow_html=True)
+
 try:
     page = st.session_state.get('page', 'Home')
+    
     if page == "Home":
         home.show()
     elif page == "Quran Reader":
@@ -409,13 +585,27 @@ try:
         hadith_specialist.show()
     elif page == "How to Use":
         how_to_use.show()
+        
+    # Auto-scroll to top after page load
+    st.markdown("""
+    <script>
+        // Scroll to top smoothly after page loads
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    </script>
+    """, unsafe_allow_html=True)
+    
 except Exception as e:
     st.error(f"Error loading page: {str(e)}")
 
+st.markdown("</div>", unsafe_allow_html=True)
+
 # ===== FOOTER =====
-st.markdown("""
+st.markdown(f"""
 <div class='footer'>
     <p style='font-family: Amiri; color: #d4af37; margin-bottom: 0.5rem;'>وَقُل رَّبِّ زِدْنِي عِلْمًا</p>
-    <p>© 2025 NoorAI - Islamic Guidance Platform</p>
+    <p>© {current_year} NoorAI - Islamic Guidance Platform</p>
 </div>
 """, unsafe_allow_html=True)
